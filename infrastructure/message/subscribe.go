@@ -71,6 +71,9 @@ func (h *handler) handle(payload []byte, header map[string]string) error {
 
 	case StyleCompetition:
 		go h.calculate(&body, m)
+
+	default:
+		logrus.Errorf("unknown competition id: %s", m.GetCompetitionId())
 	}
 
 	return nil
@@ -89,6 +92,9 @@ func (h *handler) evaluate(body *MatchMessage, m MatchFieldImpl) {
 
 	case CompetitionPhasePreliminary:
 		c.AnswerPath = m.GetAnswerPreliminaryPath()
+
+	default:
+		logrus.Errorf("unknown competition phase: %s", body.Phase)
 	}
 
 	if err := h.impl.Evaluate(body, &c); err != nil {
@@ -110,6 +116,9 @@ func (h *handler) calculate(body *MatchMessage, m MatchFieldImpl) {
 	case CompetitionPhasePreliminary:
 		c.FidWeightsPath = m.GetFidWeightsPreliminaryPath()
 		c.RealPath = m.GetRealPreliminaryPath()
+
+	default:
+		logrus.Errorf("unknown competition phase: %s", body.Phase)
 	}
 
 	if err := h.impl.Calculate(body, &c); err != nil {
