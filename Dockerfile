@@ -19,7 +19,7 @@ COPY ./py /opt/app/xihe-script/py
 RUN chmod 755 -R /opt/app/xihe-script/py/*.py
 
 ENV EVALUATE /opt/app/xihe-script/py/evaluate.py
-ENV CALCULATE /opt/app/xihe-script/py/calculate_fid.py
+
 ENV UPLOAD /opt/app/xihe-script/py/data/
 
 RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple

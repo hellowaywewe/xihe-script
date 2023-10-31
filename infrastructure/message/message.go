@@ -34,7 +34,6 @@ type metrics struct {
 }
 
 type MatchImpl interface {
-	Calculate(*MatchMessage, *MatchFields) error
 	Evaluate(*MatchMessage, *MatchFields) error
 	GetMatch(id string) MatchFieldImpl
 }

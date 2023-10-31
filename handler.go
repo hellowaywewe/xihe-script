@@ -17,12 +17,11 @@ type matchInterface interface {
 }
 
 type handler struct {
-	log       *logrus.Entry
-	maxRetry  int
-	evaluate  app.EvaluateService
-	calculate app.CalculateService
-	match     matchInterface
-	cli       *client.CompetitionClient
+	log      *logrus.Entry
+	maxRetry int
+	evaluate app.EvaluateService
+	match    matchInterface
+	cli      *client.CompetitionClient
 }
 
 type handlerMessage struct {
@@ -32,29 +31,6 @@ type handlerMessage struct {
 }
 
 const sleepTime = 100 * time.Millisecond
-
-func (h *handler) Calculate(cal *message.MatchMessage, match *message.MatchFields) error {
-	return h.do(func(b bool) error {
-		var res message.ScoreRes
-		var m = handlerMessage{MatchMessage: *cal}
-		err := h.calculate.Calculate(match, &res)
-		if err != nil {
-			h.log.Errorf("calculate script failed,err: %v", err)
-			m.status = "failed"
-		} else {
-			if res.Status != 200 {
-				h.log.Errorf("calculate script status failed,err: %v", res.Msg)
-				m.status = "failed"
-			} else {
-				m.status = "success"
-				m.score = res.Data
-			}
-		}
-		h.handlerCompetition(m)
-
-		return err
-	})
-}
 
 func (h *handler) Evaluate(eval *message.MatchMessage, match *message.MatchFields) error {
 	return h.do(func(b bool) error {

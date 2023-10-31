@@ -4,46 +4,29 @@ import (
 	"bytes"
 	"encoding/json"
 
+	"github.com/opensourceways/xihe-script/config"
 	"github.com/opensourceways/xihe-script/domain/score"
 	"github.com/opensourceways/xihe-script/infrastructure/message"
 )
 
 type scoreService struct {
-	c score.CalculateScore
-	e score.EvaluateScore
-}
-
-type CalculateService interface {
-	Calculate(*message.MatchFields, *message.ScoreRes) error
-}
-
-func NewCalculateService(c score.CalculateScore) CalculateService {
-	return &scoreService{
-		c: c,
-	}
+	e   score.EvaluateScore
+	cfg *config.Configuration
 }
 
 type EvaluateService interface {
 	Evaluate(*message.MatchFields, *message.ScoreRes) error
 }
 
-func NewEvaluateService(e score.EvaluateScore) EvaluateService {
+func NewEvaluateService(e score.EvaluateScore, cfg *config.Configuration) EvaluateService {
 	return &scoreService{
-		e: e,
+		e:   e,
+		cfg: cfg,
 	}
 }
 
 func (s *scoreService) Evaluate(col *message.MatchFields, res *message.ScoreRes) error {
-	bys, err := s.e.Evaluate(col)
-	if err != nil {
-		return err
-	}
-
-	return json.NewDecoder(bytes.NewBuffer(bys)).Decode(res)
-}
-
-func (s *scoreService) Calculate(col *message.MatchFields, res *message.ScoreRes) error {
-	bys, err := s.c.Calculate(col)
+	bys, err := s.e.Evaluate(col, &s.cfg.OBSConfig)
 	if err != nil {
 		return err
 	}

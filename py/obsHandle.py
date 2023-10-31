@@ -2,14 +2,9 @@ import os
 import traceback
 from obs import ObsClient
 
-obs_sk = os.getenv("OBS_SK")
-obs_ak = os.getenv("OBS_AK")
-obs_bucketname = os.getenv("OBS_BUCKETNAME")
-obs_endpoint = os.getenv("OBS_ENDPOINT")
-
 
 class OBSHandler:
-    def __init__(self):
+    def __init__(self, obs_ak, obs_sk, obs_bucketname, obs_endpoint):
         self.access_key = obs_ak
         self.secret_key = obs_sk
         self.bucket_name = obs_bucketname

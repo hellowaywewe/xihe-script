@@ -11,10 +11,11 @@ import (
 )
 
 type Configuration struct {
-	Matchs   []Match        `json:"matchs"    required:"true"`
-	Message  message.Config `json:"message"`
-	Endpoint string         `json:"endpoint"  required:"true"`
-	MaxRetry int            `json:"max_retry" required:"true"`
+	Matchs    []Match        `json:"matchs"    required:"true"`
+	Message   message.Config `json:"message"`
+	Endpoint  string         `json:"endpoint"  required:"true"`
+	MaxRetry  int            `json:"max_retry" required:"true"`
+	OBSConfig OBSConfig      `json:"obs_config" required:"true"`
 }
 
 func (cfg *Configuration) validate() error {
@@ -42,6 +43,14 @@ type Match struct {
 	Pos                       int    `json:"pos"`
 	Cls                       int    `json:"cls"`
 	Prefix                    string `json:"prefix" required:"true"`
+}
+
+type OBSConfig struct {
+	Prefix    string `json:"prefix"`
+	Bucket    string `json:"bucket"         required:"true"`
+	Endpoint  string `json:"endpoint"       required:"true"`
+	AccessKey string `json:"access_key"     required:"true"`
+	SecretKey string `json:"secret_key"     required:"true"`
 }
 
 func (m *Match) GetAnswerFinalPath() string {

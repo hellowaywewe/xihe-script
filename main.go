@@ -87,12 +87,11 @@ func main() {
 
 func newHandler(cfg *config.Configuration, cli *client.CompetitionClient, log *logrus.Entry) *handler {
 	return &handler{
-		maxRetry:  cfg.MaxRetry,
-		log:       log,
-		calculate: app.NewCalculateService(score.NewCalculateScore(os.Getenv("CALCULATE"))),
-		evaluate:  app.NewEvaluateService(score.NewEvaluateScore(os.Getenv("EVALUATE"))),
-		match:     cfg,
-		cli:       cli,
+		maxRetry: cfg.MaxRetry,
+		log:      log,
+		evaluate: app.NewEvaluateService(score.NewEvaluateScore(os.Getenv("EVALUATE")), cfg),
+		match:    cfg,
+		cli:      cli,
 	}
 }
 

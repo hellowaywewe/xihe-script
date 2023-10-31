@@ -20,7 +20,7 @@ def parse_args():
 
 
 def evaluate4cls(pred_path, y_true_path, cls, pos=1):
-    obs = OBSHandler()
+    obs = OBSHandler(cfg[0], cfg[1], cfg[2], cfg[3])
     data_pred = obs.readFile(pred_path)["content"]
     data_true = obs.readFile(y_true_path)["content"]
     obs.close_obs()
@@ -126,9 +126,7 @@ if __name__ == "__main__":
                        --pos 1
     """
     args_opt = parse_args()
-    y_pred_path = args_opt.pred_path
-    y_true_path = args_opt.true_path
-    cls = args_opt.cls
-    pos = args_opt.pos
-    res = evaluate4cls(y_pred_path, y_true_path, cls, pos=1)
+    cfg = input().split("+")
+
+    res = evaluate4cls(args_opt.pred_path, args_opt.true_path, args_opt.cls, args_opt.pos)
     print(res)
