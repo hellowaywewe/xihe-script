@@ -1,6 +1,8 @@
 import os
-import traceback
+import logging
 from obs import ObsClient
+
+logging.basicConfig(level=logging.NOTSET)
 
 
 class OBSHandler:
@@ -10,29 +12,29 @@ class OBSHandler:
         self.bucket_name = obs_bucketname
         self.endpoint = obs_endpoint
         self.server = obs_endpoint
-        self.obsClient = self.init_obs()
+        self.obs_client = self.init_obs()
         self.maxkeys = 5000  # 查询的对象最大个数
 
     # 初始化obs
     def init_obs(self):
-        obsClient = ObsClient(
+        obs_client = ObsClient(
             access_key_id=self.access_key,
             secret_access_key=self.secret_key,
             server=self.server
         )
-        return obsClient
+        return obs_client
 
     def close_obs(self):
-        self.obsClient.close()
+        self.obs_client.close()
 
-    def readFile(self, path):
+    def read_file(self, path):
         """
         二进制读取配置文件
         :param path:
         :return:
         """
         try:
-            resp = self.obsClient.getObject(
+            resp = self.obs_client.getObject(
                 self.bucket_name, path, loadStreamInMemory=True)
             if resp.status < 300:
                 # 获取对象内容
@@ -50,18 +52,10 @@ class OBSHandler:
                     "size": 0
                 }
         except:
-            print(traceback.format_exc())
-
-    def downloadFile(self, source_dir, dest_dir):
-        response_msg = {'status': 200, 'msg': '单个对象下载成功'}
-        res = self.obsClient.getObject(self.bucket_name, source_dir, dest_dir)
-        if res.status >= 300:
-            response_msg["status"] = -1
-            response_msg["msg"] = "单个对象下载失败"
-        return response_msg
+            logging.error('obs_client读取文件失败')
 
 
 if __name__ == "__main__":
     obs = OBSHandler()
-    # 关闭obsClient
+    # 关闭obs_client
     obs.close_obs()

@@ -1,28 +1,33 @@
 import re
 import argparse
+import logging
 
 import numpy as np
 from obsHandle import OBSHandler
 
+logging.basicConfig(level=logging.NOTSET)
 
 def parse_args():
-    # 创建解析
-    parser = argparse.ArgumentParser(description="evaluation",
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    # 添加参数
+    """解析参数"""
+    parser = argparse.ArgumentParser(description="evaluation", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--pred_path', type=str, help='y_pred obs path')
     parser.add_argument('--true_path', type=str, help='y_true obs path')
     parser.add_argument('--cls', default=256, type=int, help='the nums of cls')
     parser.add_argument('--pos', default=1, type=int, help='the first pos of cls')
-    # 解析参数
     args_opt = parser.parse_args()
     return args_opt
 
 
 def evaluate4cls(pred_path, y_true_path, cls, pos=1):
     obs = OBSHandler(cfg[0], cfg[1], cfg[2], cfg[3])
-    data_pred = obs.readFile(pred_path)["content"]
-    data_true = obs.readFile(y_true_path)["content"]
+    try:
+        data_pred = obs.read_file(pred_path)['content']
+    except KeyError:
+        raise KeyError('data_pred content not exist')
+    try:
+        data_true = obs.read_file(y_true_path)['content']
+    except KeyError:
+        raise KeyError('data_true content not exist')
     obs.close_obs()
     digit_regex = r"\d+"
     pattern = re.compile(digit_regex)
@@ -57,7 +62,7 @@ class Evaluation4Classfication:
         self.acc = np.sum(self.y_pred == self.y_true) / self.total if self.total != 0 else 0
         self.err = 1 - self.acc
 
-    def getPRF4Onecls(self, cls, beta=None):
+    def get_prf4onecls(self, cls, beta=None):
         """
         :param cls: 当前类别
         :param beta:
@@ -66,18 +71,15 @@ class Evaluation4Classfication:
                  2，recall的重要程度是precsion的一半
         :return:
         """
-        # 计算TP、FP、FN、TN
+        # 计算TP、FP
         y_pred_cls = self.y_pred == cls
         y_true_cls = self.y_true == cls
         t_total = np.sum(y_true_cls)
         f_total = self.total - t_total
         p_total = np.sum(y_pred_cls)
-        n_total = self.total - p_total
 
         tp = np.sum(y_pred_cls[y_true_cls == True])
         fp = p_total - tp
-        fn = t_total - tp
-        tn = f_total - fp
 
         # 计算precision、recall、f1、f_beta
         precison = tp / p_total if p_total != 0 else 0
@@ -94,10 +96,10 @@ class Evaluation4Classfication:
 
         return precison, recall, f1, f05, f2
 
-    def getAveragePRF(self, beta=None):
+    def get_average_prf(self, beta=None):
         ap, ar, af1, af05, af2 = 0, 0, 0, 0, 0
         for i in range(self.pos, self.cls + self.pos):
-            precison, recall, f1, f05, f2 = self.getPRF4Onecls(cls=i, beta=beta)
+            precison, recall, f1, f05, f2 = self.get_prf4onecls(cls=i, beta=beta)
             ap += precison
             ar += recall
             af1 += f1
@@ -106,7 +108,7 @@ class Evaluation4Classfication:
         return ap / self.cls, ar / self.cls, af1 / self.cls, af05 / self.cls, af2 / self.cls
 
     def evaluate(self):
-        ap, ar, af1, af05, af2 = self.getAveragePRF()
+        ap, ar, af1, af05, af2 = self.get_average_prf()
         return {
             "ap": ap,
             "ar": ar,
@@ -120,7 +122,7 @@ class Evaluation4Classfication:
 
 if __name__ == "__main__":
     """
-    python evaluate.py --y_pred_path xihe-obj/competitions/昇思AI挑战赛-多类别图像分类/submit_result/s9qfqri3zpc8j2x7_1/result_example_5120-2022-8-8-15-3-16.txt 
+    python evaluate.py --y_pred_path xihe-obj/competitions/昇思AI挑战赛-多类别图像分类/submit_result/*/result_*.txt
                        --y_true_path xihe-obj/competitions/昇思AI挑战赛-多类别图像分类/result/label.txt
                        --cls 256
                        --pos 1
@@ -129,4 +131,4 @@ if __name__ == "__main__":
     cfg = input().split("+")
 
     res = evaluate4cls(args_opt.pred_path, args_opt.true_path, args_opt.cls, args_opt.pos)
-    print(res)
+    logging.info("res: %s", res)
